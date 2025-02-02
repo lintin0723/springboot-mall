@@ -1,6 +1,5 @@
 package com.lintin0723.springbootmall.dao.impl;
 
-import com.lintin0723.springbootmall.constant.ProductCategory;
 import com.lintin0723.springbootmall.dao.ProductDao;
 import com.lintin0723.springbootmall.dto.ProductQueryParams;
 import com.lintin0723.springbootmall.dto.ProductRequest;
@@ -23,6 +22,25 @@ public class ProductDaoImpl implements ProductDao {
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    @Override
+    public Integer countProducts(ProductQueryParams productQueryParams) {
+        String sql = "SELECT count(*) FROM product WHERE 1=1";
+        Map<String,Object> map = new HashMap<>();
+        //查詢條件
+        if (productQueryParams.getCategory() != null) {
+            sql = sql + " AND category = :category";
+            map.put("category", productQueryParams.getCategory().name());
+        }
+        //%要寫在map.put內
+        if (productQueryParams.getSearch() != null) {
+            sql = sql + " AND product_name LIKE :search";
+            map.put("search", "%" + productQueryParams.getSearch() + "%");
+        }
+        //將count直轉換成integer
+        Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+        return total;
+    }
 
     @Override
     public List<Product> getProducts(ProductQueryParams productQueryParams) {
