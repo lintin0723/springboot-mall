@@ -27,16 +27,7 @@ public class ProductDaoImpl implements ProductDao {
     public Integer countProducts(ProductQueryParams productQueryParams) {
         String sql = "SELECT count(*) FROM product WHERE 1=1";
         Map<String,Object> map = new HashMap<>();
-        //查詢條件
-        if (productQueryParams.getCategory() != null) {
-            sql = sql + " AND category = :category";
-            map.put("category", productQueryParams.getCategory().name());
-        }
-        //%要寫在map.put內
-        if (productQueryParams.getSearch() != null) {
-            sql = sql + " AND product_name LIKE :search";
-            map.put("search", "%" + productQueryParams.getSearch() + "%");
-        }
+        sql = addFilterSql(sql, map, productQueryParams);
         //將count直轉換成integer
         Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
         return total;
@@ -49,18 +40,9 @@ public class ProductDaoImpl implements ProductDao {
                 "FROM product WHERE 1=1";
 
         Map<String,Object> map = new HashMap<>();
-        //一定要先檢查是否有傳參數進來，也有可能沒傳會是null
-        //AND前一定要留一個空白鍵，才能與1=1拼接
-        //查詢條件
-        if (productQueryParams.getCategory() != null) {
-            sql = sql + " AND category = :category";
-            map.put("category", productQueryParams.getCategory().name());
-        }
-        //%要寫在map.put內
-        if (productQueryParams.getSearch() != null) {
-            sql = sql + " AND product_name LIKE :search";
-            map.put("search", "%" + productQueryParams.getSearch() + "%");
-        }
+
+        sql = addFilterSql(sql, map, productQueryParams);
+
         //拼接前後都要留一個空格
         //排序
         sql = sql + " ORDER BY " + productQueryParams.getOrderBy() + " " + productQueryParams.getSort();
@@ -148,5 +130,22 @@ public class ProductDaoImpl implements ProductDao {
         map.put("productId", productId);
 
         namedParameterJdbcTemplate.update(sql, map);
+    }
+
+    private  String addFilterSql(String sql, Map<String, Object> map, ProductQueryParams productQueryParams) {
+        //一定要先檢查是否有傳參數進來，也有可能沒傳會是null
+        //AND前一定要留一個空白鍵，才能與1=1拼接
+        //查詢條件
+        if (productQueryParams.getCategory() != null) {
+            sql = sql + " AND category = :category";
+            map.put("category", productQueryParams.getCategory().name());
+        }
+        //%要寫在map.put內
+        if (productQueryParams.getSearch() != null) {
+            sql = sql + " AND product_name LIKE :search";
+            map.put("search", "%" + productQueryParams.getSearch() + "%");
+        }
+
+        return sql;
     }
 }
