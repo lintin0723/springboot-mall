@@ -2,6 +2,7 @@ package com.lintin0723.springbootmall.dao.impl;
 
 import com.lintin0723.springbootmall.constant.ProductCategory;
 import com.lintin0723.springbootmall.dao.ProductDao;
+import com.lintin0723.springbootmall.dto.ProductQueryParams;
 import com.lintin0723.springbootmall.dto.ProductRequest;
 import com.lintin0723.springbootmall.model.Product;
 import com.lintin0723.springbootmall.rowmapper.ProductRowMapper;
@@ -24,7 +25,7 @@ public class ProductDaoImpl implements ProductDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public List<Product> getProducts(ProductCategory category,String search) {
+    public List<Product> getProducts(ProductQueryParams productQueryParams) {
         String sql = "SELECT product_id, product_name, category, image_url, price, stock, description, " +
                 "created_date, last_modified_date " +
                 "FROM product WHERE 1=1";
@@ -32,14 +33,14 @@ public class ProductDaoImpl implements ProductDao {
         Map<String,Object> map = new HashMap<>();
         //一定要先檢查是否有傳參數進來，也有可能沒傳會是null
         //AND前一定要留一個空白鍵，才能與1=1拼接
-        if (category != null) {
+        if (productQueryParams.getCategory() != null) {
             sql = sql + " AND category = :category";
-            map.put("category", category.name());
+            map.put("category", productQueryParams.getCategory().name());
         }
         //%要寫在map.put內
-        if (search != null) {
+        if (productQueryParams.getSearch() != null) {
             sql = sql + " AND product_name LIKE :search";
-            map.put("search", "%" + search + "%");
+            map.put("search", "%" + productQueryParams.getSearch() + "%");
         }
 
         List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProductRowMapper());
