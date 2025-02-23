@@ -4,6 +4,7 @@ import com.lintin0723.springbootmall.dao.OrderDao;
 import com.lintin0723.springbootmall.dao.ProductDao;
 import com.lintin0723.springbootmall.dto.BuyItem;
 import com.lintin0723.springbootmall.dto.CreateOrderRequest;
+import com.lintin0723.springbootmall.model.Order;
 import com.lintin0723.springbootmall.model.OrderItem;
 import com.lintin0723.springbootmall.model.Product;
 import com.lintin0723.springbootmall.service.OrderService;
@@ -22,6 +23,17 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ProductDao productDao;
+
+    @Override
+    public Order getOrderById(Integer orderId) {
+        Order order = orderDao.getOrderById(orderId);
+
+        List<OrderItem> orderItemList = orderDao.getOrderItemsByOrderId(orderId);
+
+        order.setOrderItemList(orderItemList);
+
+        return order;
+    }
 
     //多筆資料庫同時執行，同時成功或同時失敗
     @Transactional
