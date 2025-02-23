@@ -1,6 +1,7 @@
 package com.lintin0723.springbootmall.service.impl;
 
 import com.lintin0723.springbootmall.dao.UserDao;
+import com.lintin0723.springbootmall.dto.UserLoginRequest;
 import com.lintin0723.springbootmall.dto.UserRegisterRequest;
 import com.lintin0723.springbootmall.model.User;
 import com.lintin0723.springbootmall.service.UserService;
@@ -36,4 +37,21 @@ public class UserServiceImpl implements UserService {
         return userDao.createUser(userRegisterRequest);
     }
 
+    @Override
+    public User login(UserLoginRequest userLoginRequest) {
+        User user = userDao.getUserByEmail(userLoginRequest.getEmail());
+
+        if (user == null){
+            log.warn("This email {} has not been register yet", userLoginRequest.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
+        //比較字串時要用.equals
+        if(user.getPassword().equals(userLoginRequest.getPassword())){
+            return user;
+        }else {
+            log.warn("Password of email {} is incorrect", userLoginRequest.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+    }
 }
